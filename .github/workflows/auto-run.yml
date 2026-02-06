@@ -1,0 +1,50 @@
+name: Auto Run TVBox Tools
+
+on:
+  # 定时运行，每天凌晨2点
+  schedule:
+    - cron: '0 18 * * *'  # UTC时间，对应北京时间凌晨2点
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL to process'
+        required: true
+        default: 'https://tvbox.catvod.com/xs/api.json?signame=xs'
+      mirror:
+        description: 'Mirror number'
+        required: false
+        default: '4'
+      num:
+        description: 'Number of repos to process'
+        required: false
+        default: '10'
+
+jobs:
+  run-tvbox-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run TVBox Tools
+        env:
+          username: ${{ secrets.USERNAME }}
+          token: ${{ secrets.TOKEN }}
+          url: ${{ github.event.inputs.url || 'https://tvbox.catvod.com/xs/api.json?signame=xs' }}
+          repo: ${{ secrets.REPO || 'tvbox' }}
+          mirror: ${{ github.event.inputs.mirror || '4' }}
+          num: ${{ github.event.inputs.num || '10' }}
+          site_down: 'true'
+        run: |
+          python cnb_tvbox_tools.py
