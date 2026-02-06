@@ -47,4 +47,4 @@ jobs:
           num: ${{ github.event.inputs.num || '10' }}
           site_down: 'true'
         run: |
-          python cnb_tvbox_tools.py
+          python tv.py
